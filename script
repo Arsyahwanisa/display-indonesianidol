@@ -1,0 +1,303 @@
+// Inisialisasi variabel dan data
+let selectedOperator = null;
+let queueNumber = 1;
+let history = [];
+const operators = [
+    { id: 1, name: "Operator 1", icon: "fas fa-user", active: true, callCount: 0 },
+    { id: 2, name: "Operator 2", icon: "fas fa-user", active: true, callCount: 0 },
+    { id: 3, name: "Operator 3", icon: "fas fa-user", active: true, callCount: 0 },
+    { id: 4, name: "Operator 4", icon: "fas fa-user", active: true, callCount: 0 },
+    { id: 5, name: "Operator 5", icon: "fas fa-user", active: true, callCount: 0 },
+    { id: 6, name: "Operator 6", icon: "fas fa-user", active: true, callCount: 0 },
+    { id: 7, name: "Operator 7", icon: "fas fa-user", active: true, callCount: 0 },
+    { id: 8, name: "Operator 8", icon: "fas fa-user", active: true, callCount: 0 }
+];
+
+// DOM Elements
+const operatorButtonsContainer = document.querySelector('.operator-buttons');
+const queueNumberInput = document.getElementById('queue-number');
+const prevNumberBtn = document.getElementById('prev-number');
+const nextNumberBtn = document.getElementById('next-number');
+const callBtn = document.getElementById('call-btn');
+const resetBtn = document.getElementById('reset-btn');
+const historyList = document.getElementById('history-list');
+const displayNumber = document.getElementById('display-number');
+const displayOperator = document.getElementById('display-operator');
+const currentDateElement = document.getElementById('current-date');
+const currentTimeElement = document.getElementById('current-time');
+const airportSound = document.getElementById('airport-sound');
+const statusGrid = document.querySelector('.status-grid');
+const nomorAntrianBesar = document.querySelector('.nomor-antrian-besar');
+const operatorTujuan = document.querySelector('.operator-tujuan');
+
+// Initialize the application
+function init() {
+    renderOperatorButtons();
+    renderStatusGrid();
+    updateDateTime();
+    setInterval(updateDateTime, 1000);
+    
+    // Set default selected operator
+    if (operators.length > 0) {
+        selectOperator(operators[0].id);
+    }
+    
+    // Load history from localStorage if available
+    loadHistory();
+}
+
+// Render operator buttons
+function renderOperatorButtons() {
+    operatorButtonsContainer.innerHTML = '';
+    
+    operators.forEach(operator => {
+        const button = document.createElement('button');
+        button.className = `operator-btn ${selectedOperator === operator.id ? 'active' : ''}`;
+        button.innerHTML = `
+            <i class="${operator.icon}"></i>
+            <span>${operator.name}</span>
+        `;
+        button.addEventListener('click', () => selectOperator(operator.id));
+        operatorButtonsContainer.appendChild(button);
+    });
+}
+
+// Render operator status grid
+function renderStatusGrid() {
+    statusGrid.innerHTML = '';
+    
+    operators.forEach(operator => {
+        const statusItem = document.createElement('div');
+        statusItem.className = `status-item ${operator.active ? 'active' : 'inactive'}`;
+        statusItem.innerHTML = `
+            <div class="status-icon">
+                <i class="${operator.icon}"></i>
+            </div>
+            <div class="status-name">${operator.name}</div>
+            <div class="status-counter">Dipanggil: ${operator.callCount}x</div>
+        `;
+        statusGrid.appendChild(statusItem);
+    });
+}
+
+// Select operator
+function selectOperator(operatorId) {
+    selectedOperator = operatorId;
+    renderOperatorButtons();
+    
+    // Update display
+    const operator = operators.find(op => op.id === operatorId);
+    if (operator) {
+        displayOperator.textContent = operator.name;
+        operatorTujuan.textContent = operator.name;
+    }
+}
+
+// Update date and time
+function updateDateTime() {
+    const now = new Date();
+    
+    // Format date
+    const optionsDate = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const formattedDate = now.toLocaleDateString('id-ID', optionsDate);
+    
+    // Format time
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    const seconds = now.getSeconds().toString().padStart(2, '0');
+    const formattedTime = `${hours}:${minutes}:${seconds}`;
+    
+    currentDateElement.textContent = formattedDate;
+    currentTimeElement.textContent = formattedTime;
+}
+
+// Call queue number
+function callQueue() {
+    if (!selectedOperator) {
+        alert('Silakan pilih operator terlebih dahulu!');
+        return;
+    }
+    
+    const operator = operators.find(op => op.id === selectedOperator);
+    
+    // Update display
+    displayNumber.textContent = queueNumber;
+    displayOperator.textContent = operator.name;
+    nomorAntrianBesar.textContent = queueNumber;
+    operatorTujuan.textContent = operator.name;
+    
+    // Add to history
+    const now = new Date();
+    const timeString = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+    
+    const historyItem = {
+        id: Date.now(),
+        number: queueNumber,
+        operator: operator.name,
+        time: timeString
+    };
+    
+    history.unshift(historyItem); // Add to beginning
+    renderHistory();
+    saveHistory();
+    
+    // Increment operator call count
+    operator.callCount++;
+    renderStatusGrid();
+    
+    // Play airport announcement sound
+    playAnnouncementSound();
+    
+    // Increment queue number for next call
+    queueNumber++;
+    queueNumberInput.value = queueNumber;
+}
+
+// Play announcement sound
+function playAnnouncementSound() {
+    const operator = operators.find(op => op.id === selectedOperator);
+    
+    // First play airport announcement sound
+    airportSound.play();
+    
+    // Then speak the queue number after a delay
+    setTimeout(() => {
+        const announcementText = `Nomor antrian ${queueNumber}, silakan menuju ke ${operator.name}`;
+        
+        // Use responsivevoice for text-to-speech
+        if (typeof responsiveVoice !== 'undefined') {
+            responsiveVoice.speak(announcementText, "Indonesian Female", {
+                rate: 0.9,
+                pitch: 1,
+                volume: 1
+            });
+        } else {
+            // Fallback to browser speech synthesis
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(announcementText);
+                utterance.lang = 'id-ID';
+                utterance.rate = 0.9;
+                utterance.pitch = 1;
+                utterance.volume = 1;
+                window.speechSynthesis.speak(utterance);
+            } else {
+                console.log("Text-to-speech tidak didukung di browser ini");
+            }
+        }
+    }, 1500); // Delay to match airport sound
+}
+
+// Render history list
+function renderHistory() {
+    historyList.innerHTML = '';
+    
+    if (history.length === 0) {
+        historyList.innerHTML = '<p class="empty-history">Belum ada riwayat pemanggilan</p>';
+        return;
+    }
+    
+    history.forEach(item => {
+        const historyElement = document.createElement('div');
+        historyElement.className = 'history-item';
+        historyElement.innerHTML = `
+            <div class="history-info">
+                <span class="history-number">Antrian ${item.number}</span>
+                <span> → </span>
+                <span class="history-operator">${item.operator}</span>
+            </div>
+            <div class="history-time">${item.time}</div>
+        `;
+        historyList.appendChild(historyElement);
+    });
+}
+
+// Save history to localStorage
+function saveHistory() {
+    localStorage.setItem('indonesianIdolQueueHistory', JSON.stringify(history));
+    localStorage.setItem('indonesianIdolQueueNumber', queueNumber.toString());
+    localStorage.setItem('indonesianIdolOperators', JSON.stringify(operators));
+}
+
+// Load history from localStorage
+function loadHistory() {
+    const savedHistory = localStorage.getItem('indonesianIdolQueueHistory');
+    const savedQueueNumber = localStorage.getItem('indonesianIdolQueueNumber');
+    const savedOperators = localStorage.getItem('indonesianIdolOperators');
+    
+    if (savedHistory) {
+        history = JSON.parse(savedHistory);
+        renderHistory();
+    }
+    
+    if (savedQueueNumber) {
+        queueNumber = parseInt(savedQueueNumber);
+        queueNumberInput.value = queueNumber;
+    }
+    
+    if (savedOperators) {
+        const parsedOperators = JSON.parse(savedOperators);
+        parsedOperators.forEach((savedOp, index) => {
+            if (operators[index]) {
+                operators[index].callCount = savedOp.callCount;
+            }
+        });
+        renderStatusGrid();
+    }
+}
+
+// Reset queue
+function resetQueue() {
+    if (confirm('Apakah Anda yakin ingin mereset antrian? Riwayat pemanggilan akan dihapus.')) {
+        queueNumber = 1;
+        queueNumberInput.value = queueNumber;
+        
+        history = [];
+        renderHistory();
+        
+        // Reset operator call counts
+        operators.forEach(op => op.callCount = 0);
+        renderStatusGrid();
+        
+        // Reset display
+        displayNumber.textContent = '-';
+        displayOperator.textContent = '-';
+        nomorAntrianBesar.textContent = '-';
+        operatorTujuan.textContent = '-';
+        
+        // Clear localStorage
+        localStorage.removeItem('indonesianIdolQueueHistory');
+        localStorage.removeItem('indonesianIdolQueueNumber');
+        localStorage.removeItem('indonesianIdolOperators');
+    }
+}
+
+// Event Listeners
+prevNumberBtn.addEventListener('click', () => {
+    if (queueNumber > 1) {
+        queueNumber--;
+        queueNumberInput.value = queueNumber;
+    }
+});
+
+nextNumberBtn.addEventListener('click', () => {
+    queueNumber++;
+    queueNumberInput.value = queueNumber;
+});
+
+callBtn.addEventListener('click', callQueue);
+
+resetBtn.addEventListener('click', resetQueue);
+
+// Allow manual input of queue number
+queueNumberInput.addEventListener('change', () => {
+    const value = parseInt(queueNumberInput.value);
+    if (!isNaN(value) && value > 0) {
+        queueNumber = value;
+    } else {
+        queueNumber = 1;
+        queueNumberInput.value = queueNumber;
+    }
+});
+
+// Initialize the app when DOM is loaded
+document.addEventListener('DOMContentLoaded', init);

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Antrian - Audisi Indonesian Idol</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎤</text></svg>">
+</head>
+<body>
+    <header>
+        <div class="header-left">
+            <div class="logo">
+                <i class="fas fa-microphone-alt"></i>
+                <h1>Audisi Indonesian Idol</h1>
+            </div>
+            <div class="antrian-saat-ini">
+                <h2>Antrian Saat Ini</h2>
+                <p class="silakan-menuju">Silakan menuju ke</p>
+                <div class="antrian-info">
+                    <div class="nomor-antrian-besar">-</div>
+                    <div class="operator-tujuan">-</div>
+                </div>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="date-time">
+                <div id="current-date">Senin, 1 Januari 2024</div>
+                <div id="current-time">00:00:00</div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="control-panel">
+                <h2><i class="fas fa-cogs"></i> Panel Kontrol</h2>
+                
+                <div class="operator-control">
+                    <h3>Pilih Operator</h3>
+                    <div class="operator-buttons">
+                        <!-- Operator akan di-generate oleh JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="antrian-control">
+                    <h3>Nomor Antrian</h3>
+                    <div class="nomor-control">
+                        <button id="prev-number" class="btn-control"><i class="fas fa-chevron-left"></i></button>
+                        <input type="number" id="queue-number" min="1" value="1" readonly>
+                        <button id="next-number" class="btn-control"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                </div>
+                
+                <div class="call-control">
+                    <button id="call-btn" class="call-button">
+                        <i class="fas fa-bullhorn"></i> Panggil Antrian
+                    </button>
+                    <button id="reset-btn" class="reset-button">
+                        <i class="fas fa-redo"></i> Reset Antrian
+                    </button>
+                </div>
+                
+                <div class="history-section">
+                    <h3><i class="fas fa-history"></i> Riwayat Pemanggilan</h3>
+                    <div class="history-list" id="history-list">
+                        <!-- Riwayat akan diisi oleh JavaScript -->
+                        <p class="empty-history">Belum ada riwayat pemanggilan</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="display-panel">
+                <h2><i class="fas fa-desktop"></i> Tampilan Antrian</h2>
+                <div class="queue-display">
+                    <div class="display-header">
+                        <h3>ANTRIAN SAAT INI</h3>
+                        <p class="silakan-menuju-display">Silakan menuju ke</p>
+                    </div>
+                    <div class="display-content">
+                        <div class="big-number" id="display-number">-</div>
+                        <div class="big-operator" id="display-operator">-</div>
+                    </div>
+                </div>
+                
+                <div class="operators-status">
+                    <h3>Status Operator</h3>
+                    <div class="status-grid">
+                        <!-- Status operator akan diisi oleh JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>Sistem Antrian Pendaftaran Audisi Indonesian Idol &copy; 2024</p>
+        <p class="audio-notice">🔊 Pastikan volume speaker aktif untuk mendengar pengumuman</p>
+    </footer>
+
+    <!-- Audio untuk suara pengumuman -->
+    <audio id="airport-sound" preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-airport-announcement-278.mp3" type="audio/mpeg">
+    </audio>
+    
+    <script src="https://code.responsivevoice.org/responsivevoice.js?key=3q7PzK5x"></script>
+    <script src="script.js"></script>
+</body>
+</html>
